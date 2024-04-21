@@ -1,59 +1,60 @@
-"use client";
+"use client"
+import React, { useState, useEffect } from 'react';
+import Pusher from 'pusher-js';
+import { pusherClient } from '@/components/pusher';
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Button } from '@/components/ui/button';
+import { toast } from "sonner"
 
-function App() {
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [latestMessage, setLatestMessage] = useState<string[]>([]);
+
+const pusher = pusherClient;
+
+const Notifications = () => {
+  const [notifications, setNotifications] = useState("");
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8080");
+    const channel = pusher.subscribe("123567");
 
-    socket.onopen = () => {
-      // console.log("Connected");
-      setSocket(socket);
-    };
+    channel.bind("notificqdcwdation:new", (data:any) => {
+      console.log(data);
+      setNotifications(data);
+      toast("New Notification from server")
+    });
 
-    socket.onmessage = (message) => {
-      setLatestMessage((m) => [...m, message.data]);
-    };
-
-    // Close connsecion
-    return () => socket.close();
+   
   }, []);
 
-  if (!socket) {
-    return <div>Socket server connecting...</div>;
+  const sendNotification = async () => {
+    try {
+      fetch("/api");
+      // setNotifications("..")
+    } catch (error) {
+      console.log(error);
+      
+    }
   }
 
   return (
     <div className="w-screen h-screen overflow-auto bg-black flex items-center justify-center">
-      <div className="h-screen max-w-[400px] flex flex-col items-center justify-around">
-        <Image
-          className="w-[200px]"
-          src="/Illustration.png"
-          width={100}
-          height={100}
-          alt="image"
-        />
-        <div className="flex flex-col">
-          {latestMessage?.map((d, index) => (
-            <p className="text-white" key={index}>
-              {d}
-            </p>
-          ))}
-        </div>
-        <Image
-          className="cursor-pointer w-[200px]"
-          onClick={() => socket.send("New Notification")}
-          src="/CTA Button.png"
-          width={100}
-          height={100}
-          alt="image"
-        />
-      </div>
+    <div className="h-screen max-w-[400px] flex flex-col items-center justify-around">
+      <Image
+        className="w-[200px]"
+        src="/Illustration.png"
+        width={100}
+        height={100}
+        alt="image"
+      />
+      <Image
+        className="cursor-pointer w-[200px]"
+        onClick={sendNotification}
+        src="/CTA Button.png"
+        width={100}
+        height={100}
+        alt="image"
+      />
     </div>
+  </div>
   );
-}
+};
 
-export default App;
+export default Notifications;
